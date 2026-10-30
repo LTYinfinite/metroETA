@@ -1,0 +1,479 @@
+﻿<Page
+    x:Class="HKBusWP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HKBusWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <DataTemplate x:Key="RouteRowTemplate">
+            <Border BorderBrush="#33888888"
+                    BorderThickness="0,0,0,1"
+                    Padding="19,12,19,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="84"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock LineHeight="30">
+                            <Run Text="{Binding RouteNumber}"
+                                 FontSize="27"
+                                 FontWeight="SemiBold"/>
+                            <Run Text=" "/>
+                            <Run Text="{Binding SpecialNote}"
+                                 FontSize="11"/>
+                        </TextBlock>
+                        <TextBlock Text="{Binding Company}"
+                                   FontSize="13"
+                                   Opacity="0.65"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1"
+                                VerticalAlignment="Center"
+                                Margin="6,0,8,0">
+                        <TextBlock TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding ToPrefixText}" FontSize="15" FontWeight="SemiBold"/>
+                            <Run Text="{Binding Destination}" FontSize="21" FontWeight="Bold"/>
+                        </TextBlock>
+                        <TextBlock Margin="0,4,0,0"
+                                   FontSize="14"
+                                   Opacity="0.68"
+                                   TextTrimming="CharacterEllipsis">
+                            <Run Text="{Binding StopNameAndCode}"/>
+                            <Run Text="  "/>
+                            <Run Text="{Binding FareText}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Right">
+                        <TextBlock HorizontalAlignment="Right">
+                            <Run Text="{Binding PrimaryEtaNumber}"
+                                 FontSize="22"
+                                 FontWeight="Bold"
+                                 Foreground="#1976D2"/>
+                            <Run Text="{Binding PrimaryEtaUnit}"
+                                 FontSize="13"
+                                 Foreground="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                        </TextBlock>
+                        <TextBlock Text="{Binding SecondaryEtaText}"
+                                   Visibility="{Binding SecondaryEtaVisibility}"
+                                   HorizontalAlignment="Right"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Opacity="0.6"
+                                   Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding ThirdEtaText}"
+                                   Visibility="{Binding ThirdEtaVisibility}"
+                                   HorizontalAlignment="Right"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Opacity="0.6"
+                                   Margin="0,1,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid>
+        <!-- Top-Right HKO Weather Badge -->
+        <Border HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Margin="0,10,16,0"
+                Background="#22888888"
+                Padding="8,3,8,3"
+                Canvas.ZIndex="20">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image x:Name="CurrentWeatherIconImage"
+                       Width="24"
+                       Height="24"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"
+                       Margin="0,0,5,0"/>
+                <TextBlock x:Name="TemperatureBadgeText"
+                           Text="--°C"
+                           FontSize="15"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+                <StackPanel x:Name="WarningIconsPanel"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="6,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Native Windows Phone Pivot Control (7 Tabs: Tram between Railway and Ferry) -->
+        <Pivot x:Name="MainPivot"
+               Title="METROETA"
+               SelectionChanged="MainPivot_SelectionChanged">
+
+            <!-- Tab 0: Favourites -->
+            <PivotItem x:Name="TabFavourites" Header="收藏" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="FavouritesStatusText"
+                                   Text="已收藏的常用路線及車站（可於路線頁點擊 ☆ 加入）"
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="FavouritesListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 1: Bus -->
+            <PivotItem x:Name="TabBus" Header="巴士" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="LocationStatusText"
+                                   Text="正在載入附近巴士路線..."
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="NearbyBusListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 2: Minibus -->
+            <PivotItem x:Name="TabMinibus" Header="小巴" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="MinibusStatusText"
+                                   Text="正在載入專線小巴路線..."
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="NearbyMinibusListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 3: Railway (MTR & Light Rail) -->
+            <PivotItem x:Name="TabRailway" Header="鐵路" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="RailwayStatusText"
+                                   Text="港鐵及輕鐵實時班次（自動追蹤最近港鐵站；車費計算機位於右下角 ... 選單）"
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="RailwayListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 4: HK Tramways (Standalone Page between Railway and Ferry) -->
+            <PivotItem x:Name="TabTram" Header="電車" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="TramStatusText"
+                                   Text="香港電車東行及西行全線 36 站實時班次預報"
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="TramListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 5: Ferries -->
+            <PivotItem x:Name="TabFerry" Header="渡輪" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="FerryStatusText"
+                                   Text="天星小輪、新渡輪及港九小輪航班預報"
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="FerryListView"
+                              Grid.Row="1"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemTemplate="{StaticResource RouteRowTemplate}"
+                              ItemClick="RouteListView_ItemClick">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+            <!-- Tab 6: Traffic Incidents & Road Blocking -->
+            <PivotItem x:Name="TabTraffic" Header="交通消息" Margin="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Border Grid.Row="0" Background="#15888888" Padding="19,6,19,6">
+                        <TextBlock x:Name="TrafficStatusText"
+                                   Text="運輸署實時特別交通及封路消息 (www.td.gov.hk)"
+                                   FontSize="13"
+                                   Opacity="0.8"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+                    <ListView x:Name="TrafficNewsListView"
+                              Grid.Row="1"
+                              SelectionMode="None">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#33888888"
+                                        BorderThickness="0,0,0,1"
+                                        Padding="19,12,19,12">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding HeaderDate}"
+                                                   FontSize="14"
+                                                   FontWeight="Bold"
+                                                   Foreground="#E53935"
+                                                   TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding BodyText}"
+                                                   FontSize="15"
+                                                   TextWrapping="Wrap"
+                                                   LineHeight="22"
+                                                   Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </PivotItem>
+
+        </Pivot>
+
+        <!-- Secondary Interface: MTR Station-to-Station Fare Calculator -->
+        <Grid x:Name="MtrFareCalculatorOverlay"
+              Visibility="Collapsed"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Canvas.ZIndex="70">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="#1F1F1F"
+                    Padding="19,14,14,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="METROETA"
+                                   Foreground="#B0B0B0"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock x:Name="MtrCalcOverlayTitle"
+                                   Text="港鐵站對站車費計算機"
+                                   Foreground="White"
+                                   FontSize="26"
+                                   FontWeight="Bold"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Content="✕"
+                            Foreground="White"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="22"
+                            MinWidth="44"
+                            MinHeight="40"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="CloseMtrFareCalcOverlay_Click"/>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" Margin="19,20,19,20">
+                <StackPanel>
+                    <TextBlock x:Name="MtrFromLabel"
+                               Text="起點站 (origin station)"
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+                    <ComboBox x:Name="MtrFromCombo"
+                              HorizontalAlignment="Stretch"
+                              DisplayMemberPath="DisplayName"
+                              FontSize="18"
+                              Margin="0,0,0,20"
+                              SelectionChanged="MtrStationCombo_SelectionChanged"/>
+
+                    <TextBlock x:Name="MtrToLabel"
+                               Text="終點站 (destination station)"
+                               FontSize="17"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+                    <ComboBox x:Name="MtrToCombo"
+                              HorizontalAlignment="Stretch"
+                              DisplayMemberPath="DisplayName"
+                              FontSize="18"
+                              Margin="0,0,0,24"
+                              SelectionChanged="MtrStationCombo_SelectionChanged"/>
+
+                    <Border BorderBrush="#64B5F6"
+                            BorderThickness="1"
+                            Background="#1A1976D2"
+                            Padding="16,16,16,16">
+                        <StackPanel>
+                            <TextBlock x:Name="MtrFareResultHeader"
+                                       Text="車費詳情 (八達通 / 樂悠咭兩元或兩折優惠)"
+                                       FontSize="15"
+                                       Opacity="0.8"
+                                       Margin="0,0,0,8"/>
+                            <TextBlock x:Name="MtrFareResultText"
+                                       Text=""
+                                       FontSize="20"
+                                       Foreground="#1976D2"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap"
+                                       LineHeight="28"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton x:Name="SearchRouteButton"
+                          Icon="Find"
+                          Label="搜尋路線"
+                          Click="SearchRouteButton_Click"/>
+            <AppBarButton x:Name="RefreshEtaButton"
+                          Icon="Refresh"
+                          Label="更新班次"
+                          Click="RefreshEtaButton_Click"/>
+            <AppBarButton x:Name="ToggleTimeFormatButton"
+                          Icon="Clock"
+                          Label="倒數/時鐘"
+                          Click="ToggleTimeFormatButton_Click"/>
+            <AppBarButton x:Name="RefreshLocationButton"
+                          Icon="Target"
+                          Label="重新定位"
+                          Click="RefreshLocationButton_Click"/>
+
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="OpenMtrFareCalcMenuButton"
+                              Label="港鐵車費計算機 (mtr fare calculator)"
+                              Click="OpenMtrFareCalcMenuButton_Click"/>
+                <AppBarButton x:Name="OpenSettingsMenuButton"
+                              Label="設定及關於 (settings)"
+                              Click="OpenSettingsMenuButton_Click"/>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+</Page>

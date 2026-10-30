@@ -1,0 +1,429 @@
+﻿<Page
+    x:Class="HKBusWP.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HKBusWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Pivot x:Name="SettingsPivot" Title="METROETA">
+
+            <!-- Pivot Item 1: Settings -->
+            <PivotItem x:Name="TabGeneralSettings" Header="設定">
+                <ScrollViewer>
+                    <StackPanel Margin="0,8,0,28">
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="LangSectionHeader"
+                                           Text="介面語言 / language"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+                                <ComboBox x:Name="LangComboBox"
+                                          HorizontalAlignment="Stretch"
+                                          FontSize="17"
+                                          SelectionChanged="LangComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="繁體中文"/>
+                                    <ComboBoxItem Content="english"/>
+                                </ComboBox>
+
+                                <StackPanel x:Name="RestartAppPanel"
+                                            Visibility="Collapsed"
+                                            Margin="0,10,0,0">
+                                    <TextBlock x:Name="RestartPromptText"
+                                               Text="已更改語言設定。請重新啟動應用程式以套用完整語言切換："
+                                               FontSize="14"
+                                               Foreground="#FBC02D"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,8"/>
+                                    <Button x:Name="RestartAppButton"
+                                            Content="🔄 立即重新啟動應用程式 (restart app now)"
+                                            HorizontalAlignment="Stretch"
+                                            Height="48"
+                                            FontSize="16"
+                                            Background="#1976D2"
+                                            Foreground="White"
+                                            Click="RestartAppButton_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Section 2: Default Starting Page (7 Tabs) -->
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="StartTabSectionHeader"
+                                           Text="預設啟動頁面"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+                                <ComboBox x:Name="StartTabComboBox"
+                                          HorizontalAlignment="Stretch"
+                                          FontSize="17"
+                                          SelectionChanged="StartTabComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="收藏 (favourites)"/>
+                                    <ComboBoxItem Content="巴士 (bus)"/>
+                                    <ComboBoxItem Content="小巴 (minibus)"/>
+                                    <ComboBoxItem Content="鐵路 (railway)"/>
+                                    <ComboBoxItem Content="電車 (tram)"/>
+                                    <ComboBoxItem Content="渡輪 (ferry)"/>
+                                    <ComboBoxItem Content="交通消息 (traffic)"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="StopCodeSectionHeader"
+                                           Text="車站名稱顯示格式"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,6"/>
+                                <CheckBox x:Name="HideStopCodeCheckBox"
+                                          Content="隱藏車站名稱後的代碼 (如 YT615、KC400)"
+                                          FontSize="16"
+                                          Checked="HideStopCodeCheckBox_Changed"
+                                          Unchecked="HideStopCodeCheckBox_Changed"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="RadiusSectionHeader"
+                                           Text="附近路線搜尋半徑 (50m - 500m)"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,4"/>
+                                <TextBlock x:Name="RadiusValueText"
+                                           Text="目前搜尋半徑: 250 米"
+                                           FontSize="15"
+                                           Foreground="#1976D2"
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,6"/>
+                                <Slider x:Name="RadiusSlider"
+                                        Minimum="50"
+                                        Maximum="500"
+                                        StepFrequency="50"
+                                        TickFrequency="50"
+                                        Value="250"
+                                        ValueChanged="RadiusSlider_ValueChanged"/>
+                                <Grid Margin="0,-6,0,0">
+                                    <TextBlock Text="50m" FontSize="12" Opacity="0.65" HorizontalAlignment="Left"/>
+                                    <TextBlock Text="250m" FontSize="12" Opacity="0.65" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="500m" FontSize="12" Opacity="0.65" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="ThemeSectionHeader"
+                                           Text="外觀主題"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+
+                                <RadioButton x:Name="LightThemeRadio"
+                                             Content="淺色主題 (頂部狀態列同步變白)"
+                                             FontSize="17"
+                                             Margin="0,0,0,8"
+                                             Checked="ThemeRadio_Checked"/>
+
+                                <RadioButton x:Name="DarkThemeRadio"
+                                             Content="深色主題 (Windows Phone 經典)"
+                                             FontSize="17"
+                                             Checked="ThemeRadio_Checked"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="0,0,0,16"
+                                Margin="0,0,0,20">
+                            <StackPanel>
+                                <TextBlock x:Name="OobeSectionHeader"
+                                           Text="初次體驗設定 (OOBE)"
+                                           FontSize="21"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,6"/>
+                                <Button x:Name="ResetOobeButton"
+                                        Content="重設初次體驗 (reset oobe)"
+                                        HorizontalAlignment="Stretch"
+                                        Height="48"
+                                        FontSize="16"
+                                        Click="ResetOobeButton_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel>
+                            <TextBlock x:Name="CacheSectionHeader"
+                                       Text="實時資料庫快取"
+                                       FontSize="21"
+                                       FontWeight="Bold"
+                                       Margin="0,0,0,6"/>
+                            <Button x:Name="ClearApiCacheButton"
+                                    Content="清除路線及車站快取並重新下載"
+                                    HorizontalAlignment="Stretch"
+                                    Height="48"
+                                    FontSize="16"
+                                    Click="ClearApiCacheButton_Click"/>
+                            <TextBlock x:Name="CacheStatusText"
+                                       Text=""
+                                       FontSize="14"
+                                       Foreground="#1976D2"
+                                       TextWrapping="Wrap"
+                                       Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+            <!-- Pivot Item 2: About Page -->
+            <PivotItem x:Name="TabAbout" Header="關於">
+                <ScrollViewer>
+                    <StackPanel Margin="0,12,0,28">
+
+                        <Border x:Name="AppIconTemplateBox"
+                                Width="110"
+                                Height="110"
+                                Background="#1F1F1F"
+                                BorderBrush="#64B5F6"
+                                BorderThickness="2"
+                                HorizontalAlignment="Center"
+                                Margin="0,4,0,14"
+                                Tapped="AppIconTemplateBox_Tapped">
+                            <Grid>
+                                <Line X1="0" Y1="0" X2="106" Y2="106"
+                                      Stroke="#64B5F6" StrokeThickness="2" Opacity="0.6"/>
+                                <Line X1="106" Y1="0" X2="0" Y2="106"
+                                      Stroke="#64B5F6" StrokeThickness="2" Opacity="0.6"/>
+                                <TextBlock Text="✕"
+                                           Foreground="White"
+                                           FontSize="42"
+                                           FontWeight="Bold"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="MetroETA"
+                                   FontSize="24"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="AboutVersionText"
+                                   Text="0.1"
+                                   FontSize="14"
+                                   Opacity="0.7"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,14"/>
+
+                        <!-- Easter Egg Banner: Shows only "We are 0.001% !!!" in both languages, with no countdown hint -->
+                        <Border x:Name="EasterEggBanner"
+                                Visibility="Collapsed"
+                                Background="#261976D2"
+                                BorderBrush="#64B5F6"
+                                BorderThickness="1"
+                                Padding="14,12,14,12"
+                                Margin="0,0,0,14">
+                            <TextBlock x:Name="EasterEggText"
+                                       Text="We are 0.001% !!!"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       Foreground="#64B5F6"
+                                       HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,1,0,0"
+                                Padding="0,16,0,0">
+                            <StackPanel>
+                                <TextBlock x:Name="AboutIntroHeader"
+                                           Text="應用程式簡介"
+                                           FontSize="20"
+                                           FontWeight="Bold"
+                                           Margin="0,0,0,8"/>
+                                <TextBlock x:Name="AboutIntroBody"
+                                           Text="提供全港九巴、龍運、城巴、新大嶼山巴士、港鐵巴士(K線)、專線小巴、港鐵全線、輕鐵、香港電車及渡輪實時到站預報、分段收費標示、98站港鐵車費計算、運輸署特別交通消息、香港天文台實時天氣及互動式地圖。"
+                                           FontSize="15"
+                                           Opacity="0.85"
+                                           TextWrapping="Wrap"
+                                           LineHeight="22"
+                                           Margin="0,0,0,20"/>
+
+                                <Button x:Name="OpenCreditsPageButton"
+                                        Content="鳴謝及資料來源版權 (credits &amp; attribution)"
+                                        HorizontalAlignment="Stretch"
+                                        Height="52"
+                                        FontSize="17"
+                                        Click="OpenCreditsPageButton_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </ScrollViewer>
+            </PivotItem>
+
+        </Pivot>
+
+        <!-- Standalone Credits & Attribution View -->
+        <Grid x:Name="CreditsOverlay"
+              Visibility="Collapsed"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Canvas.ZIndex="80">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="#1F1F1F"
+                    Padding="19,14,14,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="METROETA"
+                                   Foreground="#B0B0B0"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock x:Name="CreditsTitleText"
+                                   Text="鳴謝及資料來源版權"
+                                   Foreground="White"
+                                   FontSize="26"
+                                   FontWeight="Bold"
+                                   Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1"
+                            Content="✕"
+                            Foreground="White"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="22"
+                            MinWidth="44"
+                            MinHeight="40"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Click="CloseCreditsOverlay_Click"/>
+                </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" Margin="19,16,19,20">
+                <StackPanel>
+                    <Border BorderBrush="#33888888" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,18">
+                        <StackPanel>
+                            <TextBlock x:Name="Credit1Title"
+                                       Text="1. 地圖圖磚及中文地名標籤 — 香港地政總署"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Name="Credit1Desc"
+                                       Text="街道底圖及繁體中文/英文地名標籤由香港特別行政區政府地政總署 (空間數據共享平台 CSDI GeoData Store API) 提供。"
+                                       FontSize="14"
+                                       Opacity="0.8"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20"
+                                       Margin="0,6,0,10"/>
+                            <Button x:Name="Credit1Btn"
+                                    Content="開啟地政總署地圖版權及免責聲明 ↗"
+                                    HorizontalAlignment="Left"
+                                    FontSize="14"
+                                    Foreground="#1976D2"
+                                    Click="Credit1Btn_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="#33888888" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,18">
+                        <StackPanel>
+                            <TextBlock x:Name="Credit2Title"
+                                       Text="2. 道路軌跡繪製數據 — OpenStreetMap 及 OSRM"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Name="Credit2Desc"
+                                       Text="巴士、小巴及電車路線沿真實道路彎位繪製之幾何數據由 © OpenStreetMap 貢獻者及 OSRM 提供（依 ODbL 開放資料庫授權條款使用）。"
+                                       FontSize="14"
+                                       Opacity="0.8"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20"
+                                       Margin="0,6,0,10"/>
+                            <Button x:Name="Credit2Btn"
+                                    Content="開啟 © OpenStreetMap 版權聲明網頁 ↗"
+                                    HorizontalAlignment="Left"
+                                    FontSize="14"
+                                    Foreground="#1976D2"
+                                    Click="Credit2Btn_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border BorderBrush="#33888888" BorderThickness="0,0,0,1" Padding="0,0,0,16" Margin="0,0,0,18">
+                        <StackPanel>
+                            <TextBlock x:Name="Credit3Title"
+                                       Text="3. 實時公共交通及封路數據 — 資料一線通及運輸署"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Name="Credit3Desc"
+                                       Text="九巴、龍運、城巴、嶼巴、港鐵巴士、專線小巴、港鐵、輕鐵實時到站數據及特別交通消息由「資料一線通 (DATA.GOV.HK)」及香港運輸署提供。"
+                                       FontSize="14"
+                                       Opacity="0.8"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20"
+                                       Margin="0,6,0,10"/>
+                            <Button x:Name="Credit3Btn"
+                                    Content="開啟 DATA.GOV.HK 條款及細則 ↗"
+                                    HorizontalAlignment="Left"
+                                    FontSize="14"
+                                    Foreground="#1976D2"
+                                    Click="Credit3Btn_Click"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="0,0,0,16" Margin="0,0,0,18">
+                        <StackPanel>
+                            <TextBlock x:Name="Credit4Title"
+                                       Text="4. 實時氣溫及天氣警告圖示 — 香港天文台"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       TextWrapping="Wrap"/>
+                            <TextBlock x:Name="Credit4Desc"
+                                       Text="實時氣溫及生效天氣警告信號圖示由香港天文台開放數據 API 提供。"
+                                       FontSize="14"
+                                       Opacity="0.8"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20"
+                                       Margin="0,6,0,10"/>
+                            <Button x:Name="Credit4Btn"
+                                    Content="開啟香港天文台知識產權公告 ↗"
+                                    HorizontalAlignment="Left"
+                                    FontSize="14"
+                                    Foreground="#1976D2"
+                                    Click="Credit4Btn_Click"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+    </Grid>
+</Page>

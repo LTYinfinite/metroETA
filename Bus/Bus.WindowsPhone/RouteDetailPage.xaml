@@ -1,0 +1,605 @@
+﻿<Page
+    x:Class="HKBusWP.RouteDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HKBusWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="215"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Dark Header Bar -->
+        <Border Grid.Row="0"
+                Background="#1F1F1F"
+                BorderBrush="#383838"
+                BorderThickness="0,0,0,1"
+                Padding="14,10,10,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock x:Name="HeaderRouteNumberText"
+                           Grid.Column="0"
+                           Text="87D"
+                           Foreground="#64B5F6"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Margin="0,0,14,0"/>
+
+                <StackPanel Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Margin="0,0,6,0">
+                    <TextBlock x:Name="HeaderDestinationText"
+                               Text="往 錦英苑"
+                               Foreground="White"
+                               FontSize="19"
+                               FontWeight="Bold"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <TextBlock x:Name="JourneyTimeText"
+                               Text="正在載入車站..."
+                               Foreground="#B0B0B0"
+                               FontSize="12"
+                               Margin="0,3,0,0"
+                               TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <Button x:Name="ReverseDirectionButton"
+                            Background="#2D2D2D"
+                            BorderBrush="#484848"
+                            BorderThickness="1"
+                            Padding="6,4,6,4"
+                            MinWidth="54"
+                            MinHeight="44"
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            Click="ReverseDirectionButton_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="⇄"
+                                       Foreground="White"
+                                       FontSize="15"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="ReverseBtnLabel"
+                                       Text="對頭線"
+                                       Foreground="#E0E0E0"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Name="OpenTimetableTopButton"
+                            Background="#2D2D2D"
+                            BorderBrush="#484848"
+                            BorderThickness="1"
+                            Padding="6,4,6,4"
+                            MinWidth="54"
+                            MinHeight="44"
+                            VerticalAlignment="Center"
+                            Click="OpenTimetableButton_Click">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Text="🕒"
+                                       Foreground="#FFD54F"
+                                       FontSize="15"
+                                       HorizontalAlignment="Center"/>
+                            <TextBlock x:Name="TimetableBtnLabel"
+                                       Text="時間表"
+                                       Foreground="#E0E0E0"
+                                       FontSize="11"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Row 1: Pinned Route Status Banner (Shown when this route's ETA is pinned to Start Screen) -->
+        <Border x:Name="PinnedRouteBanner"
+                Grid.Row="1"
+                Visibility="Collapsed"
+                Background="#1976D2"
+                Padding="14,6,14,6">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="PinnedBannerText"
+                           Grid.Column="0"
+                           Text="📌 已釘選至開始畫面"
+                           Foreground="White"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis"/>
+                <Button x:Name="UnpinBannerButton"
+                        Grid.Column="1"
+                        Content="取消釘選"
+                        Foreground="White"
+                        Background="#33000000"
+                        BorderBrush="#66FFFFFF"
+                        BorderThickness="1"
+                        FontSize="12"
+                        MinWidth="68"
+                        MinHeight="28"
+                        Padding="8,2,8,2"
+                        Margin="8,0,0,0"
+                        Click="UnpinBannerButton_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Row 2: Crisp Native-Resolution Slippy Map Viewport -->
+        <Grid x:Name="MapViewportGrid"
+              Grid.Row="2"
+              Height="215"
+              Background="#DDE3EA"
+              ManipulationMode="TranslateX,TranslateY"
+              ManipulationDelta="MapViewportGrid_ManipulationDelta"
+              ManipulationCompleted="MapViewportGrid_ManipulationCompleted"
+              SizeChanged="MapViewportGrid_SizeChanged">
+            <Grid.Clip>
+                <RectangleGeometry x:Name="MapClipGeometry" Rect="0,0,480,215"/>
+            </Grid.Clip>
+
+            <Canvas x:Name="SlippyMapCanvas"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top">
+                <Canvas.RenderTransform>
+                    <TranslateTransform x:Name="MapDragTransform" X="0" Y="0"/>
+                </Canvas.RenderTransform>
+            </Canvas>
+
+            <StackPanel HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="10,10,0,0">
+                <Border Width="38" Height="38"
+                        Background="#EEFFFFFF"
+                        BorderBrush="#55000000"
+                        BorderThickness="1"
+                        Tapped="ZoomInMap_Tapped">
+                    <TextBlock Text="+"
+                               Foreground="Black"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0,-2,0,0"/>
+                </Border>
+                <Border Width="38" Height="38"
+                        Background="#EEFFFFFF"
+                        BorderBrush="#55000000"
+                        BorderThickness="1"
+                        Margin="0,4,0,0"
+                        Tapped="ZoomOutMap_Tapped">
+                    <TextBlock Text="−"
+                               Foreground="Black"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Margin="0,-2,0,0"/>
+                </Border>
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,10,26">
+                <Border Width="38" Height="38"
+                        Background="#EEFFFFFF"
+                        BorderBrush="#55000000"
+                        BorderThickness="1"
+                        Margin="0,0,0,4"
+                        Tapped="CenterMapOnUserGps_Tapped">
+                    <TextBlock Text="◎"
+                               Foreground="#0288D1"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+                <Border Width="38" Height="38"
+                        Background="#EEFFFFFF"
+                        BorderBrush="#55000000"
+                        BorderThickness="1"
+                        Tapped="CenterMapOnStop_Tapped">
+                    <TextBlock Text="⌖"
+                               Foreground="Black"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </StackPanel>
+
+            <Border HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Background="#EEFFFFFF"
+                    Padding="6,2,6,2">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="© OpenStreetMap"
+                               Foreground="#1565C0"
+                               FontSize="11"
+                               Tapped="OsmAttribution_Tapped"/>
+                    <TextBlock Text=" | "
+                               Foreground="Black"
+                               FontSize="11"/>
+                    <TextBlock Text="© Lands Department ⓘ"
+                               Foreground="#1565C0"
+                               FontSize="11"
+                               Tapped="LandsDeptAttribution_Tapped"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Row 3: Stop List -->
+        <ListView x:Name="StopsListView"
+                  Grid.Row="3"
+                  SelectionMode="None"
+                  IsItemClickEnabled="True"
+                  ItemClick="StopsListView_ItemClick">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="Margin" Value="0"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="#33888888"
+                            BorderThickness="0,0,0,1"
+                            Padding="16,11,16,11">
+                        <StackPanel>
+                            <TextBlock Text="{Binding HeaderText}"
+                                       FontSize="19"
+                                       FontWeight="Bold"
+                                       TextTrimming="CharacterEllipsis"/>
+
+                            <TextBlock Text="{Binding FareSummaryText}"
+                                       Visibility="{Binding FareSummaryVisibility}"
+                                       FontSize="14"
+                                       Opacity="0.8"
+                                       Margin="0,3,0,0"/>
+
+                            <StackPanel Visibility="{Binding ExpandedPanelVisibility}"
+                                        Margin="0,10,0,4">
+
+                                <Grid Margin="0,2,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <Run Text="{Binding EtaLine1Number}"
+                                             Foreground="#1976D2"
+                                             FontSize="19"
+                                             FontWeight="Bold"/>
+                                        <Run Text="{Binding EtaLine1Remark}"
+                                             FontSize="15"/>
+                                    </TextBlock>
+                                    <Button Grid.Column="1"
+                                            Content="{Binding PinButton1Label}"
+                                            Tag="0"
+                                            Visibility="{Binding EtaPin1Visibility}"
+                                            FontSize="13"
+                                            MinWidth="76"
+                                            MinHeight="34"
+                                            Padding="8,2,8,2"
+                                            Click="PinEtaButton_Click"/>
+                                </Grid>
+
+                                <Grid Visibility="{Binding EtaLine2Visibility}"
+                                      Margin="0,2,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <Run Text="{Binding EtaLine2Number}"
+                                             Foreground="#1976D2"
+                                             FontSize="19"
+                                             FontWeight="Bold"/>
+                                        <Run Text="{Binding EtaLine2Remark}"
+                                             FontSize="15"/>
+                                    </TextBlock>
+                                    <Button Grid.Column="1"
+                                            Content="{Binding PinButton2Label}"
+                                            Tag="1"
+                                            FontSize="13"
+                                            MinWidth="76"
+                                            MinHeight="34"
+                                            Padding="8,2,8,2"
+                                            Click="PinEtaButton_Click"/>
+                                </Grid>
+
+                                <Grid Visibility="{Binding EtaLine3Visibility}"
+                                      Margin="0,2,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               VerticalAlignment="Center"
+                                               TextWrapping="Wrap">
+                                        <Run Text="{Binding EtaLine3Number}"
+                                             Foreground="#1976D2"
+                                             FontSize="19"
+                                             FontWeight="Bold"/>
+                                        <Run Text="{Binding EtaLine3Remark}"
+                                             FontSize="15"/>
+                                    </TextBlock>
+                                    <Button Grid.Column="1"
+                                            Content="{Binding PinButton3Label}"
+                                            Tag="2"
+                                            FontSize="13"
+                                            MinWidth="76"
+                                            MinHeight="34"
+                                            Padding="8,2,8,2"
+                                            Click="PinEtaButton_Click"/>
+                                </Grid>
+
+                                <Button Content="{Binding NoEtaTimetableButtonLabel}"
+                                        Visibility="{Binding NoEtaTimetableButtonVisibility}"
+                                        HorizontalAlignment="Left"
+                                        FontSize="14"
+                                        MinHeight="36"
+                                        Padding="10,4,10,4"
+                                        Margin="0,4,0,6"
+                                        Click="OpenTimetableButton_Click"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="{Binding StopPortalButtonLabel}"
+                                            Visibility="{Binding StopPortalButtonVisibility}"
+                                            FontSize="13"
+                                            MinWidth="105"
+                                            MinHeight="36"
+                                            Padding="10,4,10,4"
+                                            Margin="0,0,10,0"
+                                            Click="StopPortalButton_Click"/>
+
+                                    <Button Content="{Binding FavouriteButtonLabel}"
+                                            FontSize="13"
+                                            MinWidth="105"
+                                            MinHeight="36"
+                                            Padding="10,4,10,4"
+                                            Click="ToggleFavouriteStopButton_Click"/>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- OVERLAY 1: Stop Portal -->
+        <Grid x:Name="StopPortalOverlay"
+              Grid.RowSpan="4"
+              Visibility="Collapsed"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Canvas.ZIndex="50">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#FBC02D" Padding="14,12,14,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StopPortalTitleText"
+                               Grid.Column="0"
+                               Text="🚏 香港電台電視大廈"
+                               Foreground="Black"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+                    <Button Grid.Column="1"
+                            Content="✕"
+                            Foreground="Black"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="22"
+                            FontWeight="Bold"
+                            MinWidth="44"
+                            MinHeight="40"
+                            Padding="0"
+                            Click="CloseStopPortalButton_Click"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1" Background="#15888888" Padding="16,6,16,6">
+                <TextBlock x:Name="StopPortalSubText"
+                           Text="途經此車站的所有路線（點擊任何路線即可切換）："
+                           FontSize="13"
+                           Opacity="0.8"/>
+            </Border>
+
+            <ListView x:Name="StopPortalListView"
+                      Grid.Row="2"
+                      SelectionMode="None"
+                      IsItemClickEnabled="True"
+                      ItemClick="StopPortalListView_ItemClick">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="0,0,0,1"
+                                Padding="19,12,19,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="84"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                    <TextBlock LineHeight="30">
+                                        <Run Text="{Binding RouteNumber}" FontSize="26" FontWeight="SemiBold"/>
+                                        <Run Text=" "/>
+                                        <Run Text="{Binding SpecialNote}" FontSize="11"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding Company}" FontSize="13" Opacity="0.65" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,8,0">
+                                    <TextBlock TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding ToPrefixText}" FontSize="15" FontWeight="SemiBold"/>
+                                        <Run Text="{Binding Destination}" FontSize="20" FontWeight="Bold"/>
+                                    </TextBlock>
+                                    <TextBlock Margin="0,4,0,0" FontSize="13" Opacity="0.68" TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding StopNameAndCode}"/>
+                                        <Run Text="  "/>
+                                        <Run Text="{Binding FareText}"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                    <TextBlock HorizontalAlignment="Right">
+                                        <Run Text="{Binding PrimaryEtaNumber}" FontSize="21" FontWeight="Bold" Foreground="#1976D2"/>
+                                        <Run Text="{Binding PrimaryEtaUnit}" FontSize="13" Foreground="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding SecondaryEtaText}" Visibility="{Binding SecondaryEtaVisibility}" HorizontalAlignment="Right" FontSize="14" FontWeight="SemiBold" Opacity="0.6" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{Binding ThirdEtaText}" Visibility="{Binding ThirdEtaVisibility}" HorizontalAlignment="Right" FontSize="14" FontWeight="SemiBold" Opacity="0.6" Margin="0,1,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+        <!-- OVERLAY 2: Standalone Timetable View -->
+        <Grid x:Name="TimetableOverlay"
+              Grid.RowSpan="4"
+              Visibility="Collapsed"
+              Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              Canvas.ZIndex="60">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#1F1F1F" Padding="16,12,14,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="TimetableTitleText"
+                               Grid.Column="0"
+                               Text="🕒 路線服務時間及班次表"
+                               Foreground="White"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Content="✕"
+                            Foreground="White"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            FontSize="22"
+                            MinWidth="44"
+                            MinHeight="40"
+                            Padding="0"
+                            Click="CloseTimetableButton_Click"/>
+                </Grid>
+            </Border>
+
+            <ListView x:Name="TimetableListView"
+                      Grid.Row="1"
+                      SelectionMode="None"
+                      Margin="16,12,16,16">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,0,0,12"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#33888888"
+                                BorderThickness="1"
+                                Padding="14,12,14,12">
+                            <StackPanel>
+                                <TextBlock Text="{Binding ServiceDays}"
+                                           FontSize="18"
+                                           FontWeight="Bold"
+                                           Foreground="#1976D2"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,8"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0"
+                                               Text="{Binding PeriodHours}"
+                                               FontSize="15"
+                                               TextWrapping="Wrap"
+                                               LineHeight="24"/>
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding HeadwayMinutes}"
+                                               FontSize="15"
+                                               FontWeight="SemiBold"
+                                               LineHeight="24"
+                                               Margin="12,0,0,0"
+                                               HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
+
+    </Grid>
+
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton x:Name="SearchOtherRouteBtn"
+                          Icon="Find"
+                          Label="搜尋路線"
+                          Click="OpenSearchButton_Click"/>
+            <AppBarButton x:Name="RefreshRouteEtaBtn"
+                          Icon="Refresh"
+                          Label="更新預報"
+                          Click="RefreshEtasButton_Click"/>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton x:Name="RouteSettingsMenuBtn"
+                              Label="設定及關於 (settings)"
+                              Click="OpenSettingsMenuButton_Click"/>
+            </CommandBar.SecondaryCommands>
+        </CommandBar>
+    </Page.BottomAppBar>
+</Page>
