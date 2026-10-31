@@ -11,7 +11,7 @@
 ---
 
 
-## 🗂️ Project Architecture (模組化架構)
+## 🗂️ Project Architecture
 
 The codebase is organized into modular, single-responsibility services under `Bus.WindowsPhone`:
 
@@ -31,7 +31,7 @@ The codebase is organized into modular, single-responsibility services under `Bu
 
 ---
 
-## 🛠️ Building & Sideloading (編譯及安裝教學)
+## 🛠️ Building & Sideloading
 
 ### Prerequisites
 * **Visual Studio 2013 / 2015** with the **Windows Phone 8.1 SDK** installed.
@@ -46,7 +46,7 @@ The codebase is organized into modular, single-responsibility services under `Bu
 
 ### Installing on Your Phone
 * **Via PC USB:** Use **Windows Phone Application Deployment (8.1)** or **WinAppDeployCmd** to deploy the generated `.appx` directly over USB.
-* **On-Device (Windows 10 Mobile):** Copy both the `.cer` certificate and the `.appx` package to your phone. Tap the **`.cer`** file first to install the certificate, then tap the **`.appx`** file to install **MetroETA**.
+* **On-Device (Windows 10 Mobile):** Copy the `.appx` package to your phone. Tap the **`.appx`** file to install **metroETA**.
 
 ---
 
